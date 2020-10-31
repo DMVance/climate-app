@@ -115,7 +115,7 @@ def stats(start=None, end=None):
         # calculate TMIN, TAVG, TMAX for dates greater than start when no end date provided
         results = session.query(*sel).\
             filter(Measurement.date >= start_date).all()
-        # send reults to a list
+        # send results to a list
         temps = list(np.ravel(results))
         return jsonify(temps)
 
