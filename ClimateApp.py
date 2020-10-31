@@ -15,7 +15,6 @@ import os
 
 from flask import Flask, jsonify
 
-# using declarative_base() instead of automap_base()
 Base = declarative_base()
 
 engine = create_engine("sqlite:///hawaii.sqlite?check_same_thread=False")
@@ -45,7 +44,6 @@ Station = sta
 # Get date one year from last date in the dataset
 one_year = dt.timedelta(days=365)
 max_date = session.query(func.max(Measurement.date)).first()[0]
-# max_date = dt.datetime.strptime(max_date, '%Y-%m-%d')
 start_date = max_date - one_year
 start_date = start_date.isoformat()
 
@@ -64,12 +62,9 @@ def welcome():
 
 @app.route("/api/v1.0/precipitation")
 def precipitation():
-    # Calculate the date 1 year ago from last date in database
-    prev_year = dt.date(2017, 8, 23) - dt.timedelta(days=365)
-    prev_year = prev_year.isoformat()
-
+    
     precipitation = session.query(Measurement.date, Measurement.prcp).\
-        filter(Measurement.date >= prev_year).all()
+        filter(Measurement.date >= start_date).all()
 
     dict_precip = {}
     for i in precipitation:
@@ -81,19 +76,16 @@ def precipitation():
 def stations():
     results = session.query(Station.station).all()
 
-    # Unravel results into a 1D array and convert to a list
     stations = list(np.ravel(results))
     return jsonify(stations=stations)
 
 @app.route("/api/v1.0/tobs")
 def temp_monthly():
-    # Calculate the date 1 year ago from last date in database
-    prev_year = dt.date(2017, 8, 23) - dt.timedelta(days=365)
-
-    # Query the primary station for all tobs from the last year
-    results = session.query(meas.tobs).\
+   
+    # Get all temperature observations (tobs) from the last year
+    results = session.query(Measurement.tobs).\
         filter(Measurement.station == 'USC00519281').\
-        filter(Measurement.date >= prev_year).all()
+        filter(Measurement.date >= start_date).all()
 
     temps_12months = f"SELECT m.station, m.date, m.tobs FROM measurement as m WHERE m.date >= '{start_date}';"
     most_tobs = """SELECT m.station, count(m.tobs) FROM measurement as m
@@ -109,34 +101,31 @@ def temp_monthly():
         """
     df_tobs_12mo = pd.read_sql(tobs_12mo, conn)
 
-    # Unravel results into a 1D array and convert to a list
     temps = list(np.ravel(df_tobs_12mo))
 
-    # Return the results
     return jsonify(temps=temps)
 
 @app.route("/api/v1.0/temp/<start>")
 @app.route("/api/v1.0/temp/<start>/<end>")
 def stats(start=None, end=None):
 
-    # Select statement
     sel = [func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)]
 
     if not end:
-        # calculate TMIN, TAVG, TMAX for dates greater than start
+        # calculate TMIN, TAVG, TMAX for dates greater than start when no end date provided
         results = session.query(*sel).\
-            filter(Measurement.date >= start).all()
-        # Unravel results into a 1D array and convert to a list
+            filter(Measurement.date >= start_date).all()
+        # send reults to a list
         temps = list(np.ravel(results))
         return jsonify(temps)
 
-    # calculate TMIN, TAVG, TMAX with start and stop
+    # calculate TMIN, TAVG, TMAX with start and end dates
     results = session.query(*sel).\
-        filter(Measurement.date >= start).\
+        filter(Measurement.date >= start_date).\
         filter(Measurement.date <= end).all()
-    # Unravel results into a 1D array and convert to a list
+
     temps = list(np.ravel(results))
     return jsonify(temps=temps)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
