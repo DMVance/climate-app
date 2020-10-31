@@ -8,11 +8,6 @@ In the Station Analysis section, I ran into trouble trying to do something like 
 
 I was pleased with the use of f-strings in combination with SQL statements for querying the database.
 
-Temperature Analysis I t-test: 
-The differences in average temps between June and December are relatively insignificant, ranging from 1 to 6 degrees depending on the station.
-The t-test resulted in a high t-score, indicating the datasets are more different (meaning the results are likely repeatable) and less similar and the probability is very low that the difference is a result of chance (very low p-value).
-I chose to do an unpaired t-test since there are two distinct datasets (temperatures for June and December over multiple years), rather than samples from within a single dataset.
-
 ### Step 2 Climate App
 
 I used the same patterns for reflecting the database tables into classes and query statements as I did for Step 1.
@@ -20,3 +15,14 @@ I used the same patterns for reflecting the database tables into classes and que
 An unexpected error was solved with "?check_same_thread=False" in the create_engine statement.
 
 A new-to-me numpy method of unpacking the results of a query was used: np.ravel(results)
+
+### Bonus: Other Recommended Analyses
+
+Temperature Analysis I t-test: 
+The differences in average temps between June and December are relatively insignificant, ranging from 1 to 6 degrees depending on the station.
+The t-test resulted in a high t-score, indicating the datasets are more different (meaning the results are likely repeatable) and less similar and the probability is very low that the difference is a result of chance (very low p-value).
+I chose to do an unpaired t-test since there are two distinct datasets (temperatures for June and December over multiple years), rather than samples from within a single dataset.
+
+Temperature Analysis II: Done.
+
+Daily Rainfall Average: Done.
